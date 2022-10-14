@@ -3,7 +3,8 @@ from dict import app
 from flask import render_template, redirect, url_for, flash, request
 from dict.models import Word, User, user_word
 from dict.forms import RegisterForm, LoginForm, SearchForm, BookmarkForm
-from flask_paginate import Pagination, get_page_parameter
+from flask_paginate import get_page_parameter
+from flask_sqlalchemy import Pagination
 from dict import db
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -16,17 +17,60 @@ def home_page():
 @app.route("/dict", methods=["GET","POST"])
 @login_required
 def dict_page():
+    word_per_page = 20
     bookmark_form = BookmarkForm()
     if request.method == "POST":
         bookmarked_word = request.form.get('bookmarked_word')
-        word_obj = Word.query.filter_by(name = bookmarked_word).first()
-        current_user.add_bookmark(word_obj)
+        word_obj = Word.query.filter_by(id = bookmarked_word).first()
+        current_user.edit_bookmark(word_obj)
         return redirect(url_for("dict_page"))
         
     if request.method == "GET":
         page = request.args.get('page', 1, type = int)
-        words = Word.query.paginate(page, per_page=20)
-        return render_template("dict.html", words = words, bookmark_form=bookmark_form)
+        words = Word.query.paginate(page, per_page = word_per_page)
+        return render_template("dict.html",
+                               words = words,
+                               bookmark_form=bookmark_form,
+                               c_user = current_user)
+
+@app.route('/search', methods=['POST','GET'])
+def search_page():
+    form = SearchForm()
+    words = Word.query
+    word_per_page = 20
+    if form.validate_on_submit():
+        searched_word = form.searched.data
+        words = words.filter(Word.name.like('%' + searched_word + '%'))
+        words = words.order_by(Word.id).all()
+    # if request.method == "GET":
+    #     page = request.args.get('page', 1, type = int)
+    #     start = (page - 1) * word_per_page
+    #     end = start + word_per_page
+    #     items = words[start:end]
+    #     words = Pagination(None, page, word_per_page, len(items), items)
+        return render_template('search.html',
+                               words = words,
+                               c_user = current_user)
+        
+@app.route('/bookmark', methods=['GET', 'POST'])
+@login_required
+def bookmark_page():
+    word_per_page = 20
+    bookmark_form = BookmarkForm()
+    if request.method == "POST":
+        bookmarked_word = request.form.get('bookmarked_word')
+        word_obj = Word.query.filter_by(id = bookmarked_word).first()
+        current_user.edit_bookmark(word_obj)
+        return redirect(url_for("bookmark_page"))
+        
+    if request.method == "GET":
+        words = current_user.bookmarked_word()
+        page = request.args.get('page', 1, type = int)
+        words = words.paginate(page, per_page = word_per_page)
+        return render_template("bookmark.html",
+                               words = words,
+                               bookmark_form=bookmark_form,
+                               c_user = current_user)
 
 @app.route("/register", methods=['GET','POST'])
 def register_page():
@@ -69,22 +113,4 @@ def base():
     form = SearchForm()
     return dict(form=form)   
     
-@app.route('/search', methods=['POST'])
-def search_page():
-    form = SearchForm()
-    words = Word.query
-    if form.validate_on_submit():
-        page = request.args.get('page', 1, type = int)
-        searched_word = form.searched.data
-        words = words.filter(Word.name.like('%' + searched_word + '%'))
-        
-        words = words.order_by(Word.id).all()
-        return render_template('search.html', form=form, 
-                               searched =searched_word
-                               ,words = words)
-        
-@app.route('/bookmark', methods=['GET', 'POST'])
-@login_required
-def bookmark_page():
-    words = current_user.bookmarked_word()
-    return render_template('bookmark.html', words = words)
+

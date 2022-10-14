@@ -5,84 +5,94 @@
 {%endblock %}
 
 {% block content %}
-    <div class="row" style="margin:20px;">
-        <h2 style="text-align:center;"> Word List</h2>
-        <table class="table table-hover table-dark" style="text-align:center;">
-            <thead>
-                <tr>
-                    <!-- Your Columns HERE -->
-                    <th scope="col" style="width: 100px;"></th>
-                    <th scope="col" style="width: 100px;">No.</th>
-                    <th scope="col" style="width: 800px;">Bahnaric</th>
-                    <th scope="col">Binh Dinh</th>
-                    <th scope="col">Kon Tum</th>
-                    <th scope="col">Gia Lai</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Your rows inside the table HERE: -->
-                {% for word in words.items %}
-                    <tr>
-                      <td>
-                        <!--
-                          <a class="nav-link" style="color: yellow; font-weight:bold">
-                              <i width="20" height="20" class="bi bi-bookmark-star-fill"></i> 
-                              <button class="btn btn-outline-success my-2 my-sm-0" type="button">Bookmark</button>
-                          </a>
-                        -->
-                        <form method="POST">
-                          {{bookmark_form.hidden_tag()}}
-                          <input id="bookmarked_word" name="bookmarked_word" type="hidden" value="{{word.name}}">
-                          {{bookmark_form.submit(class="btn btn-outline-success btn-block")}}
-                        </form>
-                      </td>
-                        <td>{{word.id}}</td>
-                        <td>{{word.name}}</td>
-                        <td>
-                          {% if word.BinhDinh == "Y"%}
-                            <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
-                          {%else%}
-                            <i class="bi bi-x-square-fill"></i>
-                          {%endif%}
-                        </td>
-                        <td>
-                          {% if word.KonTum == "Y"%}
-                            <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
-                          {%else%}
-                            <i class="bi bi-x-square-fill"></i>
-                          {%endif%}
-                        </td>
-                        <td>
-                          {% if word.GiaLai == "Y"%}
-                            <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
-                          {%else%}
-                            <i class="bi bi-x-square-fill"></i>
-                          {%endif%}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-        </table>
-    </div>
-    <!--pagination here-->
-    <nav aria-label="...">
-      <ul class="pagination justify-content-center">
-        <li class="page-item {% if not words.has_prev %} disabled {% endif %}">
-          <a class="page-link" href="./dict?page={{words.prev_num}}">Previous</a>
+  <div class="row" style="margin:20px;">
+    <h2 style="text-align:center;"> Word List</h2>
+    <table class="table table-hover table-dark" style="text-align:center;">
+      <thead>
+        <tr>
+          <!-- Your Columns HERE -->
+          <th scope="col" style="width: 100px;"></th>
+          <th scope="col" style="width: 100px;">No.</th>
+          <th scope="col" style="width: 800px;">Bahnaric</th>
+          <th scope="col">Binh Dinh</th>
+          <th scope="col">Kon Tum</th>
+          <th scope="col">Gia Lai</th>
+        </tr>
+      </thead>
+      <tbody>
+          <!-- Your rows inside the table HERE: -->
+          {% for word in words.items %}
+              <tr>
+                <!--Bookmark button-->
+                <td>
+                  {% if c_user.is_bookmarking(word) %}
+                  <form method="POST">
+                    {{bookmark_form.hidden_tag()}}
+                    <input id="bookmarked_word" name="bookmarked_word" type="hidden" value="{{word.id}}">
+                    {{bookmark_form.submit(class="btn btn-outline-success btn-block")}}
+                  </form>
+                  {% else %}
+                  <form method="POST">
+                    {{bookmark_form.hidden_tag()}}
+                    <input id="bookmarked_word" name="bookmarked_word" type="hidden" value="{{word.id}}">
+                    {{bookmark_form.submit(class="btn btn-outline-secondary btn-block")}}
+                  </form>
+                  {% endif%}
+                </td>
+                <!--Word ID-->
+                <td>{{word.id}}</td>
+                <!--Word name-->
+                <td>{{word.name}}</td>
+                <!--Word Audio Binh Dinh-->
+                <td>
+                  {% if word.BinhDinh == "Y"%}
+                    <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
+                  {%else%}
+                    <i class="bi bi-x-square-fill"></i>
+                  {%endif%}
+                </td>
+                <!--Word Audio KonTum-->
+                <td>
+                  {% if word.KonTum == "Y"%}
+                    <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
+                  {%else%}
+                    <i class="bi bi-x-square-fill"></i>
+                  {%endif%}
+                </td>
+                <!--Word Audio Gia Lai-->
+                <td>
+                  {% if word.GiaLai == "Y"%}
+                    <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
+                  {%else%}
+                    <i class="bi bi-x-square-fill"></i>
+                  {%endif%}
+                </td>
+              </tr>
+          {% endfor %}
+          </tbody>
+      </table>
+  </div>
+  <!--Pagination here-->
+  <nav aria-label="...">
+    <ul class="pagination justify-content-center">
+      <!--Previous button here-->
+      <li class="page-item {% if not words.has_prev %} disabled {% endif %}">
+        <a class="page-link" href="./dict?page={{words.prev_num}}">Previous</a>
+      </li>
+      <!--Generate page number here-->
+      {%for page in words.iter_pages()%}
+        <li class="page-item {%if page == words.page%}active{%endif%}">
+          {%if page==None%}
+            <a class="page-link">...</a>
+          {%else%}
+            <a class="page-link" href="./dict?page={{page}}">{{page}}<span class="sr-only">(current)</span></a>
+          {%endif%}
         </li>
-        {% for page in words.iter_pages()%}
-          <li class="page-item {%if page == words.page%}active{%endif%}">
-            {%if page=="None"%}
-              <a class="page-link">...</a>
-            {%else%}
-              <a class="page-link" href="./dict?page={{page}}">{{page}}<span class="sr-only">(current)</span></a>
-            {%endif%}
-          </li>
-        {%endfor%}
-        <li class="page-item {% if not words.has_next %} disabled {% endif %}">
-          <a class="page-link" href="./dict?page={{words.next_num}}">Next</a>
-        </li>
-      </ul>
-    </nav>
-
+      {%endfor%}
+      <!--Next button here-->
+      <li class="page-item {% if not words.has_next %} disabled {% endif %}">
+        <a class="page-link" href="./dict?page={{words.next_num}}">Next</a>
+      </li>
+    </ul>
+  </nav>
 {%endblock%}

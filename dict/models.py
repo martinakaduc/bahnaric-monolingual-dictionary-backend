@@ -16,7 +16,6 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(length=30), unique=True, nullable=False)
     email_address = db.Column(db.String(length=50), unique=True, nullable=False)
     password_hash = db.Column(db.String(length=60), nullable=False)
-    budget = db.Column(db.Integer(), nullable=False, default=1000)
         
     bookmark = db.relationship('Word', secondary=user_word, backref='bookmark_word', lazy='dynamic')
     
@@ -37,15 +36,13 @@ class User(db.Model, UserMixin):
     def is_bookmarking(self, word):
         return self.bookmark.filter(user_word.c.word_id == word.id).count() > 0
 
-    def add_bookmark(self, word):
+    def edit_bookmark(self, word):
         if not self.is_bookmarking(word):
-            self.bookmark.append(word)
+            self.bookmark.append(word) #if not bookmark, add 
             db.session.commit()
-
-    def remove_bookmark(self, word):
-        if self.is_bookmarking(word):
-            self.bookmark.remove(word)
-            db.session.commit()
+        else :
+            self.bookmark.remove(word) #if bookmark, remove
+            db.session.commit()               
     
     def bookmarked_word(self):
         return Word.query.join(
