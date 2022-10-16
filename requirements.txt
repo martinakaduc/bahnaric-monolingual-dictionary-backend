@@ -1,0 +1,4 @@
+flask_bcrypt
+flask_wtf
+wtforms
+flask_paginate
