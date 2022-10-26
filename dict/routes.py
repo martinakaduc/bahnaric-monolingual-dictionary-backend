@@ -27,7 +27,7 @@ def dict_page():
         
     if request.method == "GET":
         page = request.args.get('page', 1, type = int)
-        words = Word.query.paginate(page, per_page = word_per_page)
+        words = Word.query.paginate(page=page, per_page = word_per_page)
         return render_template("dict.html",
                                words = words,
                                bookmark_form=bookmark_form,
@@ -66,7 +66,7 @@ def bookmark_page():
     if request.method == "GET":
         words = current_user.bookmarked_word()
         page = request.args.get('page', 1, type = int)
-        words = words.paginate(page, per_page = word_per_page)
+        words = words.paginate(page=page, per_page = word_per_page)
         return render_template("bookmark.html",
                                words = words,
                                bookmark_form=bookmark_form,
