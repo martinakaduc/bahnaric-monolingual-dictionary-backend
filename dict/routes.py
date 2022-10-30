@@ -1,37 +1,33 @@
 
-from dict import app
-from flask import render_template, redirect, url_for, flash, request
+import random
+from dict import app, db, bana_bd, bana_gl, bana_kt, os
+from flask import render_template, redirect, url_for, flash, request, jsonify, send_from_directory, abort
 from dict.models import Word, User, user_word
 from dict.forms import RegisterForm, LoginForm, SearchForm, BookmarkForm
 from flask_paginate import get_page_parameter
 from flask_sqlalchemy import Pagination
-from dict import db
 from flask_login import login_user, logout_user, login_required, current_user
-
 
 @app.route("/")
 @app.route("/home")
 def home_page():
     return render_template('home.html')
 
-@app.route("/dict", methods=["GET","POST"])
+@app.route("/dict", methods=["GET"])
 @login_required
 def dict_page():
     word_per_page = 20
-    bookmark_form = BookmarkForm()
-    if request.method == "POST":
-        bookmarked_word = request.form.get('bookmarked_word')
-        word_obj = Word.query.filter_by(id = bookmarked_word).first()
-        current_user.edit_bookmark(word_obj)
-        return redirect(url_for("dict_page"))
-        
-    if request.method == "GET":
-        page = request.args.get('page', 1, type = int)
-        words = Word.query.paginate(page=page, per_page = word_per_page)
-        return render_template("dict.html",
-                               words = words,
-                               bookmark_form=bookmark_form,
-                               c_user = current_user)
+    page = request.args.get('page', 1, type = int)
+    words = Word.query.paginate(page = page, per_page = word_per_page)
+    return render_template("dict.html",
+                            words = words,
+                            c_user = current_user)
+
+@app.route("/update", methods=["POST"])
+def update():
+    word_obj = Word.query.filter_by(id = request.form['id']).first()
+    current_user.edit_bookmark(word_obj)
+    return jsonify({'result' : 'success'})
 
 @app.route('/search', methods=['POST','GET'])
 def search_page():
@@ -51,26 +47,19 @@ def search_page():
         return render_template('search.html',
                                words = words,
                                c_user = current_user)
+    flash(f"Type nothing bro ?", category="danger")
+    return redirect(url_for('dict_page'))
         
 @app.route('/bookmark', methods=['GET', 'POST'])
 @login_required
 def bookmark_page():
     word_per_page = 20
-    bookmark_form = BookmarkForm()
-    if request.method == "POST":
-        bookmarked_word = request.form.get('bookmarked_word')
-        word_obj = Word.query.filter_by(id = bookmarked_word).first()
-        current_user.edit_bookmark(word_obj)
-        return redirect(url_for("bookmark_page"))
-        
-    if request.method == "GET":
-        words = current_user.bookmarked_word()
-        page = request.args.get('page', 1, type = int)
-        words = words.paginate(page=page, per_page = word_per_page)
-        return render_template("bookmark.html",
-                               words = words,
-                               bookmark_form=bookmark_form,
-                               c_user = current_user)
+    words = current_user.bookmarked_word()
+    page = request.args.get('page', 1, type = int)
+    words = words.paginate(page = page, per_page = word_per_page)
+    return render_template("bookmark.html",
+                            words = words,
+                            c_user = current_user)
 
 @app.route("/register", methods=['GET','POST'])
 def register_page():
@@ -112,5 +101,31 @@ def logout_page():
 def base():
     form = SearchForm()
     return dict(form=form)   
+
+
+@app.route('/<region_tag>/<word>', methods=['GET'])
+def download(region_tag, word):
+    dir = ""
+    fn = ""
+
+    if region_tag == "BD":
+        dir = os.path.join(bana_bd, word)
+
+    elif region_tag == "KT":
+        dir = os.path.join(bana_kt, word)
+
+    elif region_tag == "GL":
+        dir = os.path.join(bana_gl, word)   
+    else:
+        return abort(404)
+    dir = dir.strip()
+    try:
+        list_files = os.listdir(dir)
+    except:
+        return abort(404)
+    fn = random.choice(list_files)
+
+    return send_from_directory(directory=dir, path=fn)
+
     
 

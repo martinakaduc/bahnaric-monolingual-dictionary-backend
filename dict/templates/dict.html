@@ -23,21 +23,17 @@
           <!-- Your rows inside the table HERE: -->
           {% for word in words.items %}
               <tr>
-                <!--Bookmark button-->
+                <!--Bookmark Button-->
                 <td>
                   {% if c_user.is_bookmarking(word) %}
-                  <form method="POST">
-                    {{bookmark_form.hidden_tag()}}
-                    <input id="bookmarked_word" name="bookmarked_word" type="hidden" value="{{word.id}}">
-                    {{bookmark_form.submit(class="btn btn-outline-success btn-block")}}
-                  </form>
+                  <button class="btn btn-outline-success btn-block bookmarkButton" id="bookmark_{{word.id}}" word_id="{{word.id}}">
+                    Bookmark
+                  </button>
                   {% else %}
-                  <form method="POST">
-                    {{bookmark_form.hidden_tag()}}
-                    <input id="bookmarked_word" name="bookmarked_word" type="hidden" value="{{word.id}}">
-                    {{bookmark_form.submit(class="btn btn-outline-secondary btn-block")}}
-                  </form>
-                  {% endif%}
+                  <button class="btn btn-outline-secondary btn-block bookmarkButton" id="bookmark_{{word.id}}" word_id="{{word.id}}">
+                    Bookmark
+                  </button>
+                  {% endif%} 
                 </td>
                 <!--Word ID-->
                 <td>{{word.id}}</td>
@@ -46,7 +42,12 @@
                 <!--Word Audio Binh Dinh-->
                 <td>
                   {% if word.BinhDinh == "Y"%}
-                    <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
+                  <audio id="BD{{word.id}}">
+                    <source src="{{url_for('download', region_tag='BD', word=word.name)}}" type ="audio/mpeg">
+                  </audio>
+                  <button class="audioButton btn btn-primary" audio_id="BD{{word.id}}" type="button">
+                    <i class="bi bi-megaphone"></i>
+                  </button>
                   {%else%}
                     <i class="bi bi-x-square-fill"></i>
                   {%endif%}
@@ -54,7 +55,12 @@
                 <!--Word Audio KonTum-->
                 <td>
                   {% if word.KonTum == "Y"%}
-                    <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
+                    <audio id="KT{{word.id}}">
+                      <source src="{{url_for('download', region_tag='KT', word=word.name)}}" type ="audio/mpeg">
+                    </audio>
+                    <button class="audioButton btn btn-primary" audio_id="KT{{word.id}}" type="button">
+                      <i class="bi bi-megaphone"></i>
+                    </button>
                   {%else%}
                     <i class="bi bi-x-square-fill"></i>
                   {%endif%}
@@ -62,7 +68,12 @@
                 <!--Word Audio Gia Lai-->
                 <td>
                   {% if word.GiaLai == "Y"%}
-                    <button class="btn btn-primary"><i class="bi bi-megaphone"></i></button>
+                    <audio region="GL" id="GL{{word.id}}">
+                      <source src="{{url_for('download', region_tag='GL', word=word.name)}}" type ="audio/mpeg">
+                    </audio>
+                    <button class="audioButton btn btn-primary" audio_id="GL{{word.id}}" type="button">
+                      <i class="bi bi-megaphone"></i>
+                    </button>
                   {%else%}
                     <i class="bi bi-x-square-fill"></i>
                   {%endif%}
