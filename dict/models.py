@@ -1,10 +1,6 @@
-from dict import db, login_manager
+from dict import db
 from dict import bcrypt
 from flask_login import UserMixin
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 user_word = db.Table('user_word',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -61,6 +57,16 @@ class Word(db.Model):
     KonTum = db.Column(db.Integer)
     GiaLai = db.Column(db.Integer)
     
+class DailyWord(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    word_id = db.Column(db.Integer(), db.ForeignKey('word.id'))
+    date = db.Column(db.Date())
+
+    daily = db.relationship('Word', backref='daily_word')
+
+    def get_word_of_the_day(self):
+        return Word.query.join(DailyWord, (self.word_id == Word.id)).first()
+
 
     
 
