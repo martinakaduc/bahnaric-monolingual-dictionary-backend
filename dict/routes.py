@@ -1,8 +1,9 @@
 
+from datetime import datetime
 import random
 from dict import app, db, bana_bd, bana_gl, bana_kt, os
 from flask import render_template, redirect, url_for, flash, request, jsonify, send_from_directory, abort
-from dict.models import Word, User, user_word
+from dict.models import Word, User, user_word, DailyWord
 from dict.forms import RegisterForm, LoginForm, SearchForm, BookmarkForm
 from flask_paginate import get_page_parameter
 from flask_sqlalchemy import Pagination
@@ -59,6 +60,27 @@ def bookmark_page():
     words = words.paginate(page = page, per_page = word_per_page)
     return render_template("bookmark.html",
                             words = words,
+                            c_user = current_user)
+
+@app.route("/daily", methods=["GET", "POST"])
+@login_required
+def daily_page():
+    daily_word = DailyWord.query.order_by(DailyWord.id.desc()).first()
+
+    if (not daily_word) or daily_word.date < datetime.now().date():
+        ran_num =  random.randrange(Word.query.first().id, Word.query.count())
+
+        daily_word = DailyWord(word_id=ran_num,
+                                date=datetime.now()
+                                )
+        db.session.add(daily_word)
+        db.session.commit()
+
+    # join DailyWord and Word relation and get word
+    word_of_the_day = daily_word.get_word_of_the_day()
+
+    return render_template("daily.html",
+                            word = word_of_the_day,
                             c_user = current_user)
 
 @app.route("/register", methods=['GET','POST'])
