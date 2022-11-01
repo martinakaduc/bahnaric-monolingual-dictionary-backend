@@ -20,15 +20,6 @@ content %}
       <tr>
         <!--Bookmark Button-->
         <td>
-          {% if c_user.is_bookmarking(word) %}
-          <button
-            class="btn btn-outline-success btn-block bookmarkButton"
-            id="bookmark_{{word.id}}"
-            word_id="{{word.id}}"
-          >
-            Bookmark
-          </button>
-          {% else %}
           <button
             class="btn btn-outline-secondary btn-block bookmarkButton"
             id="bookmark_{{word.id}}"
@@ -36,7 +27,6 @@ content %}
           >
             Bookmark
           </button>
-          {% endif%}
         </td>
         <!--Word ID-->
         <td>{{word.id}}</td>

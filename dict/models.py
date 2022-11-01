@@ -1,3 +1,4 @@
+import json
 from dict import db
 from dict import bcrypt
 from flask_login import UserMixin
@@ -56,6 +57,8 @@ class Word(db.Model):
     BinhDinh = db.Column(db.Integer)
     KonTum = db.Column(db.Integer)
     GiaLai = db.Column(db.Integer)
+    def to_dict(self):
+        return {"name": self.name, "BinhDinh": self.BinhDinh, "KonTum": self.KonTum, "GiaLai": self.GiaLai}
     
 class DailyWord(db.Model):
     id = db.Column(db.Integer(), primary_key=True)

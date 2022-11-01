@@ -7,3 +7,4 @@ flask_wtf
 wtforms
 wtforms.validators
 flask_paginate
+flask_cors

@@ -14,15 +14,17 @@ from flask_login import login_user, logout_user, login_required, current_user
 def home_page():
     return render_template('home.html')
 
-@app.route("/dict", methods=["GET"])
-@login_required
+@app.route("/api/dict", methods=["GET"])
+# @login_required
 def dict_page():
     word_per_page = 20
     page = request.args.get('page', 1, type = int)
     words = Word.query.paginate(page = page, per_page = word_per_page)
-    return render_template("dict.html",
-                            words = words,
-                            c_user = current_user)
+    words_dict = [word.to_dict() for word in words.items]
+    return jsonify({"next": f'http://localhost:5000/api/dict?page={words.next_num}', "previous": f'http://localhost:5000/api/dict?page={words.prev_num}',"results": words_dict})
+    # return render_template("dict.html",
+    #                         words = words,
+    #                         c_user = current_user)
 
 @app.route("/update", methods=["POST"])
 def update():
@@ -30,7 +32,7 @@ def update():
     current_user.edit_bookmark(word_obj)
     return jsonify({'result' : 'success'})
 
-@app.route('/search', methods=['POST','GET'])
+@app.route('/api/search', methods=['POST','GET'])
 def search_page():
     form = SearchForm()
     words = Word.query
@@ -39,20 +41,23 @@ def search_page():
         searched_word = form.searched.data
         words = words.filter(Word.name.like('%' + searched_word + '%'))
         words = words.order_by(Word.id).all()
+        words_dict = [word.to_dict() for word in words.items]
     # if request.method == "GET":
     #     page = request.args.get('page', 1, type = int)
     #     start = (page - 1) * word_per_page
     #     end = start + word_per_page
     #     items = words[start:end]
     #     words = Pagination(None, page, word_per_page, len(items), items)
-        return render_template('search.html',
-                               words = words,
-                               c_user = current_user)
-    flash(f"Type nothing bro ?", category="danger")
-    return redirect(url_for('dict_page'))
+
+        return jsonify({"results": words_dict})
+        # return render_template('search.html',
+        #                        words = words,
+        #                        c_user = current_user)
+    # flash(f"Type nothing bro ?", category="danger")
+    # return redirect(url_for('dict_page'))
         
 @app.route('/bookmark', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def bookmark_page():
     word_per_page = 20
     words = current_user.bookmarked_word()
@@ -63,7 +68,7 @@ def bookmark_page():
                             c_user = current_user)
 
 @app.route("/daily", methods=["GET", "POST"])
-@login_required
+# @login_required
 def daily_page():
     daily_word = DailyWord.query.order_by(DailyWord.id.desc()).first()
 
