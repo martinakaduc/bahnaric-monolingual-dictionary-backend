@@ -21,7 +21,11 @@ def dict_page():
     page = request.args.get('page', 1, type = int)
     words = Word.query.paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
-    return jsonify({"next": f'http://localhost:5000/api/dict?page={words.next_num}', "previous": f'http://localhost:5000/api/dict?page={words.prev_num}',"results": words_dict})
+
+    next_link = None if words.next_num == None else f'http://localhost:5000/api/dict?page={words.next_num}'
+    prev_link = None if words.prev_num == None else f'http://localhost:5000/api/dict?page={words.prev_num}'
+
+    return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
 
 @app.route("/update", methods=["POST"])
 def update():
@@ -40,7 +44,10 @@ def search_page():
     words = words.order_by(Word.id).paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
 
-    return jsonify({"next": f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.next_num}', "previous": f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.prev_num}',"results": words_dict})
+    next_link = None if words.next_num == None else f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.next_num}'
+    prev_link = None if words.prev_num == None else f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.prev_num}'
+    
+    return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
         
 @app.route('/bookmark', methods=['GET', 'POST'])
 # @login_required
