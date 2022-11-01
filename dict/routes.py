@@ -41,7 +41,7 @@ def search_page():
         searched_word = form.searched.data
         words = words.filter(Word.name.like('%' + searched_word + '%'))
         words = words.order_by(Word.id).all()
-        words_dict = [word.to_dict() for word in words.items]
+        words_dict = [word.to_dict() for word in words]
     # if request.method == "GET":
     #     page = request.args.get('page', 1, type = int)
     #     start = (page - 1) * word_per_page
