@@ -22,9 +22,6 @@ def dict_page():
     words = Word.query.paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
     return jsonify({"next": f'http://localhost:5000/api/dict?page={words.next_num}', "previous": f'http://localhost:5000/api/dict?page={words.prev_num}',"results": words_dict})
-    # return render_template("dict.html",
-    #                         words = words,
-    #                         c_user = current_user)
 
 @app.route("/update", methods=["POST"])
 def update():
@@ -32,29 +29,18 @@ def update():
     current_user.edit_bookmark(word_obj)
     return jsonify({'result' : 'success'})
 
-@app.route('/api/search', methods=['POST','GET'])
+@app.route('/api/search', methods=['GET'])
 def search_page():
-    form = SearchForm()
-    words = Word.query
     word_per_page = 20
-    if form.validate_on_submit():
-        searched_word = form.searched.data
-        words = words.filter(Word.name.like('%' + searched_word + '%'))
-        words = words.order_by(Word.id).all()
-        words_dict = [word.to_dict() for word in words]
-    # if request.method == "GET":
-    #     page = request.args.get('page', 1, type = int)
-    #     start = (page - 1) * word_per_page
-    #     end = start + word_per_page
-    #     items = words[start:end]
-    #     words = Pagination(None, page, word_per_page, len(items), items)
+    page = request.args.get('page', 1, type = int)
+    searched_word = request.args.get('searched_word','', type=None)
+    if searched_word == '':
+        return abort(400)
+    words = Word.query.filter(Word.name.like('%' + searched_word + '%'))
+    words = words.order_by(Word.id).paginate(page = page, per_page = word_per_page)
+    words_dict = [word.to_dict() for word in words.items]
 
-        return jsonify({"results": words_dict})
-        # return render_template('search.html',
-        #                        words = words,
-        #                        c_user = current_user)
-    # flash(f"Type nothing bro ?", category="danger")
-    # return redirect(url_for('dict_page'))
+    return jsonify({"next": f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.next_num}', "previous": f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.prev_num}',"results": words_dict})
         
 @app.route('/bookmark', methods=['GET', 'POST'])
 # @login_required
