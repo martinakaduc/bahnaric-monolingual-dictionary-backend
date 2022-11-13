@@ -60,7 +60,7 @@ def bookmark_page():
                             words = words,
                             c_user = current_user)
 
-@app.route("/daily", methods=["GET", "POST"])
+@app.route("/api/daily", methods=["GET"])
 # @login_required
 def daily_page():
     daily_word = DailyWord.query.order_by(DailyWord.id.desc()).first()
@@ -75,11 +75,9 @@ def daily_page():
         db.session.commit()
 
     # join DailyWord and Word relation and get word
-    word_of_the_day = daily_word.get_word_of_the_day()
+    word_of_the_day = daily_word.get_word_of_the_day().to_dict()
 
-    return render_template("daily.html",
-                            word = word_of_the_day,
-                            c_user = current_user)
+    return jsonify({"results": word_of_the_day})
 
 @app.route("/register", methods=['GET','POST'])
 def register_page():
