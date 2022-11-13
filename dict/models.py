@@ -54,11 +54,12 @@ class User(db.Model, UserMixin):
 class Word(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(), nullable=False, unique=True)
-    BinhDinh = db.Column(db.Integer)
-    KonTum = db.Column(db.Integer)
-    GiaLai = db.Column(db.Integer)
+    pos = db.Column(db.String())
+    BinhDinh = db.Column(db.String())
+    KonTum = db.Column(db.String())
+    GiaLai = db.Column(db.String())
     def to_dict(self):
-        return {"name": self.name, "BinhDinh": self.BinhDinh, "KonTum": self.KonTum, "GiaLai": self.GiaLai}
+        return {"name": self.name, "pos": self.pos, "BinhDinh": self.BinhDinh, "KonTum": self.KonTum, "GiaLai": self.GiaLai}
     
 class DailyWord(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
