@@ -2,14 +2,22 @@ import datetime
 from datetime import datetime, timezone, timedelta
 import random
 import json
-from dict import app, db, bana_bd, bana_gl, bana_kt, os
+from dict import app, db, bana_bd, bana_gl, bana_kt, os, jwt
 from flask import render_template, redirect, url_for, flash, request, jsonify, send_from_directory, abort
-from dict.models import Word, User, user_word, DailyWord
+from dict.models import Word, User, user_word, DailyWord, TokenBlocklist
 from dict.forms import RegisterForm, LoginForm, SearchForm, BookmarkForm
 from flask_paginate import get_page_parameter
 from flask_sqlalchemy import Pagination
 from flask_login import login_user, logout_user, login_required
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, unset_jwt_cookies, jwt_required, current_user, JWTManager
+
+
+@jwt.token_in_blocklist_loader
+def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
+    jti = jwt_payload["jti"]
+    token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
+
+    return token is not None
 
 @app.after_request 
 def refresh_expiring_jwts(response): #used to refresh token :D just ignore this part :D
@@ -43,11 +51,18 @@ def create_token():
         return jsonify(access_token=access_token)
     return jsonify({"msg": "Invalid username or password"}), 401   
 
-@app.route("/api/logout", methods=["POST"])
-def logout():  #not complete yet
-    response = jsonify({"msg": "logout successful"})
-    unset_jwt_cookies(response)
-    return response
+#send DELETE, remember to include in request's Header: Authorization: Bearer <token>
+@app.route("/api/logout", methods=["DELETE"])
+@jwt_required(verify_type=False)
+def modify_token():
+    token = get_jwt()
+    jti = token["jti"]
+    ttype = token["type"]
+    now = datetime.now(timezone.utc)
+    db.session.add(TokenBlocklist(jti=jti, type=ttype, created_at=now))
+    db.session.commit()
+    return jsonify(msg=f"{ttype.capitalize()} token successfully revoked")
+
 
 #send GET, remember to include in request's Header: Authorization: Bearer <token>
 @app.route('/api/bookmark', methods=["GET"])

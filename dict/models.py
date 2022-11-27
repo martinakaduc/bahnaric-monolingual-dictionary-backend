@@ -2,6 +2,7 @@ import json
 from dict import db
 from dict import bcrypt
 from flask_login import UserMixin
+from flask_jwt_extended import get_current_user
 
 user_word = db.Table('user_word',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -71,6 +72,17 @@ class DailyWord(db.Model):
     def get_word_of_the_day(self):
         return Word.query.join(DailyWord, (self.word_id == Word.id)).first()
 
-
-    
-
+ 
+class TokenBlocklist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, index=True)
+    type = db.Column(db.String(16), nullable=False)
+    user_id = db.Column(
+        db.ForeignKey('user.id'),
+        default=lambda: get_current_user().id,
+        nullable=False,
+    )
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+    )
