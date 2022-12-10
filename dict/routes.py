@@ -63,7 +63,39 @@ def modify_token():
     db.session.commit()
     return jsonify(msg=f"{ttype.capitalize()} token successfully revoked")
 
-
+#send POST, remember to include in request's Header: Authorization: Bearer <token>
+#{
+#   "id":  
+#}
+@app.route('/api/update_bookmark', methods=["POST"])
+@jwt_required() #protected page
+def api_update_bookmark():
+    try:
+        word_obj = Word.query.filter_by(id = request.json.get("id", None)).first()
+        current_user.edit_bookmark(word_obj)
+        if(current_user.is_bookmarking(word_obj) != 0):
+            return jsonify({'msg' : 'success', "action": "add"})
+        else:
+            return jsonify({'msg' : 'success', "action": "remove"})
+    except:
+        return jsonify({'msg' : 'fail'})
+  
+#send POST, remember to include in request's Header: Authorization: Bearer <token>
+#{
+#   "id":  
+#}  
+@app.route('/api/check_bookmark', methods=["POST"])
+@jwt_required() #protected page
+def api_check_bookmark():
+    try:
+        word_obj = Word.query.filter_by(id = request.json.get("id", None)).first()
+        if(current_user.is_bookmarking(word_obj) != 0):
+            return jsonify({'msg' : 'true'})
+        else:
+            return jsonify({'msg' : 'false'})
+    except:
+        return jsonify({'msg' : 'fail'})
+    
 #send GET, remember to include in request's Header: Authorization: Bearer <token>
 @app.route('/api/bookmark', methods=["GET"])
 @jwt_required() #protected page
