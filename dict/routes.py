@@ -107,8 +107,8 @@ def api_bookmark():
     words = words.paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
     
-    next_link = None if words.next_num == None else f'http://localhost:5000/profile?page={words.next_num}'
-    prev_link = None if words.prev_num == None else f'http://localhost:5000/profile?page={words.prev_num}'
+    next_link = None if words.next_num == None else f'http://localhost:5000/api/bookmark?page={words.next_num}'
+    prev_link = None if words.prev_num == None else f'http://localhost:5000/api/bookmark?page={words.prev_num}'
 
     return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
 
