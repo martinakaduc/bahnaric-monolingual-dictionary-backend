@@ -18,9 +18,6 @@ git clone https://github.com/DoAnBana/bana-speech-web-service.git
 cd bana-speech-web-service
 ```
 
-### Configure the environment
-
-
 ### Install the requirements
 Install the requirements in the requirements.txt file in the currently active Python3 virtual environment.
 ```{bash}
