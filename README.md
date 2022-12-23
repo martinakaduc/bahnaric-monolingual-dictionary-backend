@@ -31,7 +31,7 @@ python run.py
 ```
 
 ### Demo the app
-After running both frontend and backend source code, to try the app, you can login with following information:
+After running **both frontend and backend source code**, to try the app, you can open http://localhost:3000/ and login with following information:
 ```
 username: hoa
 password: 123456
