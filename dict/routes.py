@@ -143,13 +143,8 @@ def api_register():
         return jsonify({'err': output})
     return jsonify({"msg": "create success ?"})        
 
-@app.route("/")
-@app.route("/home")
-def home_page():
-    return render_template('home.html')
 
 @app.route("/api/dict", methods=["GET"])
-# @login_required
 def dict_page():
     word_per_page = 20
     page = request.args.get('page', 1, type = int)
@@ -183,19 +178,8 @@ def search_page():
     
     return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
         
-@app.route('/bookmark', methods=['GET', 'POST'])
-# @login_required
-def bookmark_page():
-    word_per_page = 20
-    words = current_user.bookmarked_word()
-    page = request.args.get('page', 1, type = int)
-    words = words.paginate(page = page, per_page = word_per_page)
-    return render_template("bookmark.html",
-                            words = words,
-                            c_user = current_user)
 
 @app.route("/api/daily", methods=["GET"])
-# @login_required
 def daily_page():
     daily_word = DailyWord.query.order_by(DailyWord.id.desc()).first()
 
@@ -213,41 +197,6 @@ def daily_page():
 
     return jsonify({"results": word_of_the_day})
 
-@app.route("/register", methods=['GET','POST'])
-def register_page():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        user_to_create = User(username=form.username.data,
-                              email_address=form.email_address.data,
-                              password=form.password1.data)
-        db.session.add(user_to_create)
-        db.session.commit()
-        login_user(user_to_create)
-        flash(f"Account created !! You are now logged in as {user_to_create.username}", category="success")
-        return redirect(url_for('dict_page'))
-    if form.errors != {}:
-        for err_msg in form.errors.values():
-            flash(f'There was an error: {err_msg}', category='danger')
-    return render_template('register.html', form=form)
-
-@app.route('/login', methods=['GET','POST'])
-def login_page():
-    form = LoginForm()
-    if form.validate_on_submit():
-        attempted_user = User.query.filter_by(username=form.username.data).first()
-        if attempted_user and attempted_user.check_password_correction(attempted_password=form.password.data):
-            login_user(attempted_user)
-            flash(f'Success!!! You are logged in as: {attempted_user.username}', category='success')
-            return redirect(url_for('dict_page'))
-        else:
-            flash('Username or password is not match! Please try again', category='danger')
-    return render_template('login.html', form=form)
-
-@app.route("/logout")
-def logout_page():
-    logout_user()
-    flash("Logged out successfully!!!", category="info")
-    return redirect(url_for("home_page"))
     
 @app.context_processor
 def base():
