@@ -30,7 +30,7 @@ pip install -r requirements.txt
 ### Start the app
 Start the backend server by running the following command:
 ```{bash}
-flask --app run.py run
+python run.py
 ```
 
 ### Demo the app
