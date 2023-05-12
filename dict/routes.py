@@ -107,8 +107,8 @@ def api_bookmark():
     words = words.paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
     
-    next_link = None if words.next_num == None else f'http://localhost:5000/api/bookmark?page={words.next_num}'
-    prev_link = None if words.prev_num == None else f'http://localhost:5000/api/bookmark?page={words.prev_num}'
+    next_link = None if words.next_num == None else f'https://www.ura.hcmut.edu.vn/bahnar/monolingual-dictionary/api/bookmark?page={words.next_num}'
+    prev_link = None if words.prev_num == None else f'https://www.ura.hcmut.edu.vn/bahnar/monolingual-dictionary/api/bookmark?page={words.prev_num}'
 
     return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
 
@@ -151,8 +151,8 @@ def dict_page():
     words = Word.query.paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
 
-    next_link = None if words.next_num == None else f'http://localhost:5000/api/dict?page={words.next_num}'
-    prev_link = None if words.prev_num == None else f'http://localhost:5000/api/dict?page={words.prev_num}'
+    next_link = None if words.next_num == None else f'https://www.ura.hcmut.edu.vn/bahnar/monolingual-dictionary/api/dict?page={words.next_num}'
+    prev_link = None if words.prev_num == None else f'https://www.ura.hcmut.edu.vn/bahnar/monolingual-dictionary/api/dict?page={words.prev_num}'
 
     return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
 
@@ -173,8 +173,8 @@ def search_page():
     words = words.order_by(Word.id).paginate(page = page, per_page = word_per_page)
     words_dict = [word.to_dict() for word in words.items]
 
-    next_link = None if words.next_num == None else f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.next_num}'
-    prev_link = None if words.prev_num == None else f'http://localhost:5000/api/search?searched_word={searched_word}&page={words.prev_num}'
+    next_link = None if words.next_num == None else f'https://www.ura.hcmut.edu.vn/bahnar/monolingual-dictionary/api/search?searched_word={searched_word}&page={words.next_num}'
+    prev_link = None if words.prev_num == None else f'https://www.ura.hcmut.edu.vn/bahnar/monolingual-dictionary/api/search?searched_word={searched_word}&page={words.prev_num}'
     
     return jsonify({"next": next_link, "previous": prev_link,"results": words_dict})
         
